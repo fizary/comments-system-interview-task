@@ -2,12 +2,15 @@ import { Sequelize } from "sequelize";
 import config from "../config/config.js";
 
 // Import all used models
+import { createCommentModel } from "./comment.js";
 
 // Initialize sequelize
 const sequelize = new Sequelize(config.database, config.username, config.password, config);
 
 // Create an object to hold all models
-const models = {};
+const models = {
+  Comment: createCommentModel(sequelize),
+};
 
 // Initialize associations
 for (const model of Object.values(models))
