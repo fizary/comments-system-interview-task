@@ -1,38 +1,36 @@
+import { config } from "dotenv";
 import express from "express";
 import bodyParser from "body-parser";
-import { config } from "dotenv";
 import sequelize from "./utils/database.js";
+import { router } from "./routes.js";
 
 // Initialize environment variables
 config();
 
+// Setup express
 const app = express();
-
-// Middleware
 app.use(bodyParser.json());
 
-// Root route
-app.get("/", (req, res) => {
-  res.status(200).json({ message: "Interview task" });
-});
+// Register router
+app.use(router);
 
-// Global Error Handling Middleware
+// Global error handling
 app.use((error, req, res, next) => {
-  const status = error.statusCode || 500;
-  const message = error.message;
-  const data = error.data;
+  console.error(error);
 
-  res.status(status).json({ success: false, message: message, data: data });
+  return res
+    .status(error.statusCode || 500)
+    .json({
+      success: false,
+      message: "Internal server error",
+    });
 });
 
-// DB Connection
+// DB connection
 sequelize
+  .authenticate()
   .then(() => {
-    console.log("Connection has been established successfully.");
-    app.listen(process.env.PORT, () => {
-      console.log(`Server is running on port ${process.env.PORT}`);
-    });
+    console.log("Connection to the database has been established successfully.");
+    app.listen(process.env.PORT, () => console.log(`Server is running on port ${process.env.PORT}`));
   })
-  .catch((error) => {
-    console.error("Unable to connect to the database: ", error);
-  });
+  .catch((error) => console.error("Unable to connect to the database: ", error));
