@@ -5,6 +5,8 @@ import { sequelize } from "./models/index.js";
 import { router } from "./routes.js";
 import { NotFoundError } from "./utils/errors.js";
 
+// @TODO: UPDATE DEPENDENCIES!
+
 // Initialize environment variables
 config();
 
@@ -34,6 +36,7 @@ app.use((error, req, res, next) => {
         .json({
           success: false,
           message: error.message,
+          errors: error.errors,
         });
     else
       return res
@@ -49,6 +52,7 @@ app.use((error, req, res, next) => {
     .json({
       success: false,
       message: error.message,
+      errors: error.errors,
       stackTrace: error.stack,
     });
 });
