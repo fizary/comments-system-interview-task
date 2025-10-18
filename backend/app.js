@@ -1,20 +1,22 @@
 import { config } from "dotenv";
 import express from "express";
 import bodyParser from "body-parser";
-import sequelize from "./utils/database.js";
+import { sequelize } from "./models/index.js";
 import { router } from "./routes.js";
 
 // Initialize environment variables
 config();
 
-// Setup express
+// Create express application
 const app = express();
+
+// Register body parser middleware
 app.use(bodyParser.json());
 
-// Register router
+// Register app router middleware
 app.use(router);
 
-// Global error handling
+// Register global error handling middleware
 app.use((error, req, res, next) => {
   console.error(error);
 
@@ -26,11 +28,11 @@ app.use((error, req, res, next) => {
     });
 });
 
-// DB connection
+// Test database connection and start express listener
 sequelize
   .authenticate()
   .then(() => {
     console.log("Connection to the database has been established successfully.");
-    app.listen(process.env.PORT, () => console.log(`Server is running on port ${process.env.PORT}`));
+    app.listen(process.env.APP_PORT, () => console.log(`Server is running on port ${process.env.APP_PORT}`));
   })
   .catch((error) => console.error("Unable to connect to the database: ", error));
