@@ -3,6 +3,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import { sequelize } from "./models/index.js";
 import { router } from "./routes.js";
+import { NotFoundError } from "./utils/errors.js";
 
 // Initialize environment variables
 config();
@@ -16,15 +17,39 @@ app.use(bodyParser.json());
 // Register app router middleware
 app.use(router);
 
+// Register 404 handler
+app.all("*", (req, res, next) => {
+  return next(new NotFoundError());
+});
+
 // Register global error handling middleware
 app.use((error, req, res, next) => {
+  error.statusCode ??= 500;
   console.error(error);
 
+  if (process.env.NODE_ENV === "production") {
+    if (error.isOperational)
+      return res
+        .status(error.statusCode)
+        .json({
+          success: false,
+          message: error.message,
+        });
+    else
+      return res
+        .status(500)
+        .json({
+          success: false,
+          message: "Internal server error",
+        });
+  }
+
   return res
-    .status(error.statusCode || 500)
+    .status(error.statusCode)
     .json({
       success: false,
-      message: "Internal server error",
+      message: error.message,
+      stackTrace: error.stack,
     });
 });
 
