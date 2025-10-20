@@ -5,8 +5,6 @@ import { sequelize } from "./models/index.js";
 import { router } from "./routes.js";
 import { NotFoundError } from "./utils/errors.js";
 
-// @TODO: UPDATE DEPENDENCIES!
-
 // Initialize environment variables
 config();
 
