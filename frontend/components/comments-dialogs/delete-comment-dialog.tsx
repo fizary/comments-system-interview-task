@@ -30,7 +30,7 @@ type EditCommentDialogProps = {
 
 export const DeleteCommentDialog = ({ comment }: EditCommentDialogProps) => {
   const [open, setOpen] = useState(false);
-  const [deleteComment, { isLoading, isSuccess, error, reset }] =
+  const [deleteComment, { isLoading, isSuccess, error }] =
     api.useDeleteCommentMutation();
   const formErrors =
     error && "status" in error && typeof error.status === "number"

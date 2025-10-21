@@ -34,6 +34,14 @@ services:
       - backend
     depends_on:
       - db
+    environment:
+      - DB_DIALECT=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=interview
+      - DB_USER=root
+      - DB_PASSWORD=interview123
+
 
   frontend:
     container_name: next_frontend
