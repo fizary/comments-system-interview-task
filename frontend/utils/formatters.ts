@@ -1,6 +1,7 @@
 const dateFormatter = new Intl.DateTimeFormat("pl-PL", {
   dateStyle: "medium",
   timeStyle: "medium",
+  timeZone: "UTC",
 });
 
 export function formatDate(date: Date | string | number) {

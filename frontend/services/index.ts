@@ -11,7 +11,8 @@ function isHydrateAction(action: Action): action is PayloadAction<any> {
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL,
+    baseUrl:
+      process.env.NEXT_PUBLIC_DOCKER_API_URL ?? process.env.NEXT_PUBLIC_API_URL,
     responseHandler: async (response) => {
       const payload = (await response.json()) as ApiResponse<unknown>;
 

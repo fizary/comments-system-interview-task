@@ -1,0 +1,34 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# git
+.git
+.gitignore
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+Dockerfile
+docker-compose.yml
+*.md
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
