@@ -12,11 +12,11 @@ export const getAllHandler = async (req, res, next) => {
     return next(new ValidationError(result.array().map(error => error.msg)));
 
   const data = matchedData(req);
-  const comments = await models.Comment.findAll({ limit: data.limit ?? 10, offset: data.offset ?? 0, order: [["id", "DESC"]] });
+  const { rows: comments, count } = await models.Comment.findAndCountAll({ limit: data.limit ?? 10, offset: data.offset ?? 0, order: [["id", "DESC"]] });
 
   return res
     .status(200)
-    .json({ success: true, data: comments });
+    .json({ success: true, data: comments, metadata: { totalItems: count } });
 }
 
 export const getOneHandler = async (req, res, next) => {

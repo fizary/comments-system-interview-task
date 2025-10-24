@@ -1,46 +1,28 @@
-import { MessageSquareTextIcon } from "lucide-react";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
-import { Spinner } from "@/components/ui/spinner";
 import { api } from "@/services";
-import { CommentsTable } from "./comments-table";
 import {
-  useGetCommentsFilters,
-  COMMENTS_LIMIT_FILTER,
-} from "./use-get-comments-filters";
+  Pagination,
+  useCurrentPage,
+  getPaginationFilters,
+} from "@/components/pagination";
+import { COMMENTS_PER_PAGE } from "@/constants";
+import { CommentsTable } from "./comments-table";
 
 export const EnhancedCommentsTable = () => {
+  const currentPage = useCurrentPage();
+  const paginationFilters = getPaginationFilters(
+    currentPage,
+    COMMENTS_PER_PAGE
+  );
+  const { data, isFetching } = api.useGetCommentsQuery(paginationFilters);
+  const totalPages = Math.ceil(
+    (data?.metadata?.totalItems ?? 1) / COMMENTS_PER_PAGE
+  );
   const comments = data?.data ?? [];
 
   return (
     <div className="rounded-md border">
-      <CommentsTable comments={comments} />
-      {isLoading ? (
-        <div className="p-5 flex justify-center items-center">
-          <Spinner className="size-16" />
-        </div>
-      ) : (
-        comments.length <= 0 && (
-          <Empty>
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <MessageSquareTextIcon />
-              </EmptyMedia>
-              <EmptyTitle>No comments</EmptyTitle>
-              <EmptyDescription>
-                No comments have been added yet.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        )
-      )}
+      <CommentsTable comments={comments} isLoading={isFetching} />
+      <Pagination url="/" currentPage={currentPage} totalPages={totalPages} />
     </div>
   );
 };
-
-export { COMMENTS_LIMIT_FILTER };

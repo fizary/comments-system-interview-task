@@ -5,9 +5,14 @@ import {
   type FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
 
+type Metadata = {
+  totalItems?: number;
+};
+
 export type ApiResponse<T> = {
   success: true;
   data: T;
+  metadata?: Metadata;
 };
 
 type ErrorResponse = {
