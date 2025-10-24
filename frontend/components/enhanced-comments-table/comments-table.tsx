@@ -35,7 +35,9 @@ export const CommentsTable = ({ comments }: CommentsTableProps) => {
           <TableRow key={comment.id}>
             <TableCell>{comment.id}</TableCell>
             <TableCell>{comment.author}</TableCell>
-            <TableCell className="min-w-36">{comment.message}</TableCell>
+            <TableCell className="min-w-36 max-w-80">
+              {comment.message}
+            </TableCell>
             <TableCell>{formatDate(comment.createdAt)}</TableCell>
             <TableCell>{formatDate(comment.updatedAt)}</TableCell>
             <TableCell className="flex gap-1 flex-wrap [&>*]:grow">
