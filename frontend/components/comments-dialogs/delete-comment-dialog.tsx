@@ -46,7 +46,7 @@ export const DeleteCommentDialog = ({ comment }: EditCommentDialogProps) => {
           Delete
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Delete comment</DialogTitle>
           <DialogDescription>

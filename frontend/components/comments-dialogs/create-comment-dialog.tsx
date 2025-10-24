@@ -59,7 +59,7 @@ export const CreateCommentDialog = () => {
           Add comment
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Add comment</DialogTitle>
           <DialogDescription>
@@ -83,6 +83,7 @@ export const CreateCommentDialog = () => {
                 id="message"
                 name="message"
                 placeholder="Share your opinion"
+                className="min-h-24"
               />
             </Field>
           </FieldGroup>

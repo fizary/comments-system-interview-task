@@ -65,7 +65,7 @@ export const EditCommentDialog = ({ comment }: EditCommentDialogProps) => {
           Edit
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit comment</DialogTitle>
           <DialogDescription>
@@ -91,6 +91,7 @@ export const EditCommentDialog = ({ comment }: EditCommentDialogProps) => {
                 name="message"
                 placeholder="Share your opinion"
                 defaultValue={comment.message}
+                className="min-h-24"
               />
             </Field>
           </FieldGroup>
