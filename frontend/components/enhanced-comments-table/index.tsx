@@ -15,9 +15,7 @@ import {
 } from "./use-get-comments-filters";
 
 export const EnhancedCommentsTable = () => {
-  const getCommentsFilters = useGetCommentsFilters();
-  const { data, isLoading } = api.useGetCommentsQuery(getCommentsFilters);
-  const comments = data ?? [];
+  const comments = data?.data ?? [];
 
   return (
     <div className="rounded-md border">

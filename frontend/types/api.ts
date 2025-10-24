@@ -5,7 +5,7 @@ import {
   type FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
 
-type SuccessResponse<T> = {
+export type ApiResponse<T> = {
   success: true;
   data: T;
 };
@@ -16,12 +16,10 @@ type ErrorResponse = {
   errors?: string[];
 };
 
-export type ApiResponse<T> = SuccessResponse<T> | ErrorResponse;
-
 export type BaseQueryFn = BaseQueryFnOrigin<
   string | FetchArgs,
   unknown,
-  | { status: number; data: { message: string; errors?: string[] } }
+  | { status: number; data: ErrorResponse }
   | Extract<FetchBaseQueryError, { status: string }>
 >;
 
