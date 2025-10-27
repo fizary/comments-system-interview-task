@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { TrashIcon } from "lucide-react";
-import { api } from "@/services";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,25 +20,38 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import { ErrorMessage } from "@/components/error-message";
 import type { Comment } from "@/types/comment";
+import { useDeleteComment } from "./use-delete-comment";
 
 type EditCommentDialogProps = {
   comment: Comment;
+  onDelete?: () => void;
 };
 
-export const DeleteCommentDialog = ({ comment }: EditCommentDialogProps) => {
+export const DeleteCommentDialog = ({
+  comment,
+  onDelete,
+}: EditCommentDialogProps) => {
   const [open, setOpen] = useState(false);
-  const [deleteComment, { isLoading, isSuccess, error }] =
-    api.useDeleteCommentMutation();
-  const formErrors =
-    error && "status" in error && typeof error.status === "number"
-      ? [error.data.message, ...(error.data.errors ?? [])]
-      : [];
-  const isProcessing = isLoading || isSuccess;
+  const { deleteComment, reset, isLoading, formErrors } = useDeleteComment();
+
+  const deleteHandler = () => {
+    deleteComment(comment.id)
+      .unwrap()
+      .then(() => {
+        openChangeHandler(false);
+        if (onDelete) onDelete();
+      })
+      .catch(() => {});
+  };
+
+  const openChangeHandler = (open: boolean) => {
+    if (!open) reset();
+    setOpen(open);
+  };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={openChangeHandler}>
       <DialogTrigger asChild>
         <Button variant="destructive" size="sm">
           <TrashIcon size={16} />
@@ -53,7 +65,13 @@ export const DeleteCommentDialog = ({ comment }: EditCommentDialogProps) => {
             Are you sure you want to delete the comment?
           </DialogDescription>
         </DialogHeader>
-        {formErrors.length > 0 && <ErrorMessage errors={formErrors} />}
+        {formErrors && (
+          <div className="text-destructive">
+            {formErrors.map((error) => (
+              <div key={error}>{error}</div>
+            ))}
+          </div>
+        )}
         <Table>
           <TableHeader>
             <TableRow>
@@ -76,10 +94,10 @@ export const DeleteCommentDialog = ({ comment }: EditCommentDialogProps) => {
           </DialogClose>
           <Button
             variant="destructive"
-            disabled={isProcessing}
-            onClick={() => deleteComment(comment.id)}
+            disabled={isLoading}
+            onClick={deleteHandler}
           >
-            {isProcessing ? (
+            {isLoading ? (
               <>
                 <Spinner /> Deleting...
               </>

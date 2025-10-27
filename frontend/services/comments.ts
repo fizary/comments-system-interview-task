@@ -1,16 +1,15 @@
-import type { ApiBuilder, ApiResponse } from "@/types/api";
+import type { CustomEndpointBuilder, ApiResponse } from "@/types/api";
 import type {
   Comment,
+  CommentsFilters,
   CreateCommentPayload,
   UpdateCommentPayload,
 } from "@/types/comment";
 
-export function createCommentEndpoints(builder: ApiBuilder) {
+// RTK Query does not have normalized cache, so it is excessively hard to optimize manual updates and invalidation
+export function createCommentEndpoints(builder: CustomEndpointBuilder) {
   return {
-    getComments: builder.query<
-      ApiResponse<Comment[]>,
-      { limit?: number; offset?: number }
-    >({
+    getComments: builder.query<ApiResponse<Comment[]>, CommentsFilters>({
       query: (args) => {
         const filters = new URLSearchParams();
 
@@ -19,20 +18,11 @@ export function createCommentEndpoints(builder: ApiBuilder) {
 
         return `comments?${filters.toString()}`;
       },
-      providesTags: (result) =>
-        result
-          ? [
-              "comments",
-              ...result.data.map((comment) => ({
-                type: "comments",
-                id: comment.id,
-              })),
-            ]
-          : ["comments"],
+      providesTags: ["comments"],
     }),
     getComment: builder.query<ApiResponse<Comment>, number>({
       query: (id) => `comments/${id}`,
-      providesTags: (result, error, id) => [{ type: "comments", id }],
+      providesTags: ["comments"],
     }),
     createComment: builder.mutation<ApiResponse<Comment>, CreateCommentPayload>(
       {
@@ -41,7 +31,7 @@ export function createCommentEndpoints(builder: ApiBuilder) {
           method: "POST",
           body: payload,
         }),
-        invalidatesTags: () => ["comments"],
+        invalidatesTags: (_, error) => (!error ? ["comments"] : []),
       }
     ),
     updateComment: builder.mutation<ApiResponse<Comment>, UpdateCommentPayload>(
@@ -51,9 +41,7 @@ export function createCommentEndpoints(builder: ApiBuilder) {
           method: "PUT",
           body: payload,
         }),
-        invalidatesTags: (result, error, args) => [
-          { type: "comments", id: args.id },
-        ],
+        invalidatesTags: (_, error) => (!error ? ["comments"] : []),
       }
     ),
     deleteComment: builder.mutation<ApiResponse<Comment>, number>({
@@ -61,7 +49,7 @@ export function createCommentEndpoints(builder: ApiBuilder) {
         url: `comments/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, id) => [{ type: "comments", id }],
+      invalidatesTags: (_, error) => (!error ? ["comments"] : []),
     }),
   };
 }

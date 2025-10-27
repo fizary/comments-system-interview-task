@@ -2,8 +2,7 @@ import Head from "next/head";
 import { wrapper } from "@/store";
 import { api } from "@/services";
 import { COMMENTS_PER_PAGE } from "@/constants";
-import { EnhancedCommentsTable } from "@/components/enhanced-comments-table";
-import { CreateCommentDialog } from "@/components/comments-dialogs";
+import { EnhancedCommentsTable } from "@/components/comments/enhanced-comments-table";
 import {
   convertPageStringToInteger,
   getPaginationFilters,
@@ -37,10 +36,9 @@ export default function Home() {
         />
       </Head>
       <main className="min-h-screen flex items-center justify-center p-5">
-        <div className="flex flex-col gap-10 w-full max-w-5xl">
+        <div className="flex flex-col gap-16 w-full max-w-5xl">
           <h1 className="text-4xl text-center">Comments</h1>
           <EnhancedCommentsTable />
-          <CreateCommentDialog />
         </div>
       </main>
     </>

@@ -1,8 +1,9 @@
 import {
   type EndpointBuilder,
-  type BaseQueryFn as BaseQueryFnOrigin,
+  type BaseQueryFn,
   type FetchArgs,
   type FetchBaseQueryError,
+  type FetchBaseQueryMeta,
 } from "@reduxjs/toolkit/query/react";
 
 type Metadata = {
@@ -15,17 +16,27 @@ export type ApiResponse<T> = {
   metadata?: Metadata;
 };
 
-type ErrorResponse = {
+export type ApiError<T> = {
   success: false;
   message: string;
-  errors?: string[];
+  errors?: { [K in keyof T]: string[] };
 };
 
-export type BaseQueryFn = BaseQueryFnOrigin<
+export type CustomFetchBaseQueryError<T> =
+  | { status: number; data: ApiError<T> }
+  | Extract<FetchBaseQueryError, { status: string }>;
+
+export type CustomBaseQueryFn = BaseQueryFn<
   string | FetchArgs,
   unknown,
-  | { status: number; data: ErrorResponse }
-  | Extract<FetchBaseQueryError, { status: string }>
+  CustomFetchBaseQueryError<unknown>,
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  {},
+  FetchBaseQueryMeta
 >;
 
-export type ApiBuilder = EndpointBuilder<BaseQueryFn, string, "api">;
+export type CustomEndpointBuilder = EndpointBuilder<
+  CustomBaseQueryFn,
+  string,
+  "api"
+>;

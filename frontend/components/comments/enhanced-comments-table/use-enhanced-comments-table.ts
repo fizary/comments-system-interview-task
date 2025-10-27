@@ -1,13 +1,8 @@
 import { api } from "@/services";
-import {
-  Pagination,
-  useCurrentPage,
-  getPaginationFilters,
-} from "@/components/pagination";
+import { useCurrentPage, getPaginationFilters } from "@/components/pagination";
 import { COMMENTS_PER_PAGE } from "@/constants";
-import { CommentsTable } from "./comments-table";
 
-export const EnhancedCommentsTable = () => {
+export const useEnhancedCommentsTable = () => {
   const currentPage = useCurrentPage();
   const paginationFilters = getPaginationFilters(
     currentPage,
@@ -19,10 +14,5 @@ export const EnhancedCommentsTable = () => {
   );
   const comments = data?.data ?? [];
 
-  return (
-    <div className="rounded-md border">
-      <CommentsTable comments={comments} isLoading={isFetching} />
-      <Pagination url="/" currentPage={currentPage} totalPages={totalPages} />
-    </div>
-  );
+  return { comments, currentPage, totalPages, isLoading: isFetching };
 };

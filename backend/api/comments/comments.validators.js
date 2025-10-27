@@ -1,60 +1,24 @@
-import { param, body, query } from "express-validator";
-import { validateOneOfExists } from "../../utils/validators.js";
+// It is a good practice to use same validator library on both frontend and backend for consistency
+// That's why i switched to zod, because it is general purpose validator not tied to express and can run both in nodejs and browser
+import z from "zod";
 
-// Field validators
-const validateId = () => {
-  return param("id")
-    .customSanitizer(value => Number(value))
-    .isInt({ min: 1 }).withMessage("Parameter `id` must be an integer greater than 0.");
-}
+// Messages
+const limitErrorMessage = "Limit must be an integer between 1 and 20.";
+const offsetErrorMessage = "Offset must be an integer greater or equal 0.";
+const idErrorMessage = "Id must be an integer greater than 0.";
+const authorErrorMessage = "Author must be 3 to 30 characters long.";
+const messageErrorMessage = "Message must be 3 to 300 characters long.";
 
-const validateAuthor = (required = true) => {
-  const validator = body("author");
+// Fields
+const id = z.coerce.number(idErrorMessage).int(idErrorMessage).min(1, idErrorMessage);
+const author = z.string(authorErrorMessage).trim().min(3, authorErrorMessage).max(30, authorErrorMessage);
+const message = z.string(messageErrorMessage).trim().min(3, messageErrorMessage).max(300, messageErrorMessage);
+const limit = z.coerce.number(limitErrorMessage).int(limitErrorMessage).min(1, limitErrorMessage).max(20, limitErrorMessage);
+const offset = z.coerce.number(offsetErrorMessage).int(offsetErrorMessage).min(0, offsetErrorMessage);
 
-  if (required)
-    validator.exists().withMessage("Field `author` is required.");
-  else
-    validator.optional();
-    
-  return validator
-    .isString().withMessage("Field `author` must be a string.")
-    .trim()
-    .isLength({ min: 3, max: 30 }).withMessage("Field `author` must be from 3 to 30 characters long.")
-    .escape();
-}
-
-const validateMessage = (required = true) => {
-  const validator = body("message");
-
-  if (required)
-    validator.exists().withMessage("Field `message` is required.");
-  else
-    validator.optional();
-
-  return validator
-    .isString().withMessage("Field `message` must be a string.")
-    .trim()
-    .isLength({ min: 3, max: 300 }).withMessage("Field `message` must be from 3 to 300 characters long.")
-    .escape();
-}
-
-const validateLimit = () => {
-  return query("limit")
-    .optional()
-    .customSanitizer(value => Number(value))
-    .isInt({ min: 1, max: 20 }).withMessage("Query parameter `limit` must be an integer between 1 and 20.");
-}
-
-const validateOffset = () => {
-  return query("offset")
-    .optional()
-    .customSanitizer(value => Number(value))
-    .isInt({ min: 0 }).withMessage("Query parameter `offset` must be an integer greater or equal 0.");
-}
-
-// Route validators
-export const validateGetAllRoute = [validateLimit(), validateOffset()];
-export const validateGetOneRoute = [validateId()];
-export const validateCreateRoute = [validateAuthor(), validateMessage()];
-export const validateUpdateRoute = [validateId(), validateOneOfExists([body("author"), body("message")]), validateAuthor(false), validateMessage(false)];
-export const validateDeleteRoute = [validateId()];
+// Schemas
+export const getAllCommentsSchema = z.object({ limit: limit.optional(), offset: offset.optional() });
+export const getOneCommentSchema = z.object({ id });
+export const createCommentSchema = z.object({ author, message });
+export const updateCommentSchema = z.object({ id, author, message });
+export const deleteCommentSchema = z.object({ id });

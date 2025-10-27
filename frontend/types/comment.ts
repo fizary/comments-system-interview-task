@@ -6,17 +6,17 @@ export type Comment = {
   updatedAt: string;
 };
 
-export type CreateCommentPayload = {
+export type CommentsFilters = {
+  limit?: number;
+  offset?: number;
+};
+
+export type CommentPayload = {
   author: string;
   message: string;
 };
 
-export type UpdateCommentPayload = {
+export type CreateCommentPayload = CommentPayload;
+export type UpdateCommentPayload = CommentPayload & {
   id: number;
-} & (
-  | { author: string; message: string }
-  | {
-      author: string;
-    }
-  | { message: string }
-);
+};

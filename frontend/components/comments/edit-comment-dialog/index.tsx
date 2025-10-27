@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from "react";
 import { PencilIcon } from "lucide-react";
-import { api } from "@/services";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,13 +11,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { FieldGroup, Field, FieldLabel } from "@/components/ui/field";
+import {
+  FieldGroup,
+  Field,
+  FieldLabel,
+  FieldError,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
-import { ErrorMessage } from "@/components/error-message";
 import type { Comment } from "@/types/comment";
-import { commentSchemaWithId } from "./comment-validators";
+import { useEditComment } from "./use-edit-comment";
 
 type EditCommentDialogProps = {
   comment: Comment;
@@ -26,39 +29,36 @@ type EditCommentDialogProps = {
 
 export const EditCommentDialog = ({ comment }: EditCommentDialogProps) => {
   const [open, setOpen] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [updateComment, { isLoading, error }] = api.useUpdateCommentMutation();
-  const formErrors = [
-    ...validationErrors,
-    ...(error && "status" in error && typeof error.status === "number"
-      ? [error.data.message, ...(error.data.errors ?? [])]
-      : []),
-  ];
+  const { updateComment, validate, reset, isLoading, formErrors, fieldErrors } =
+    useEditComment();
 
-  const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
+  const submitHandler = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
-    const validationResult = commentSchemaWithId.safeParse({
-      id: comment.id,
-      author: formData.get("author"),
-      message: formData.get("message"),
+    const payload = validate({
+      author: String(formData.get("author")),
+      message: String(formData.get("message")),
     });
 
-    if (!validationResult.success)
-      return setValidationErrors(
-        validationResult.error.issues.map((issue) => issue.message)
-      );
+    if (!payload) return;
 
-    try {
-      setValidationErrors([]);
-      await updateComment(validationResult.data).unwrap();
-      setOpen(false);
-    } catch {}
+    updateComment({
+      id: comment.id,
+      ...payload,
+    })
+      .unwrap()
+      .then(() => openChangeHandler(false))
+      .catch(() => {});
+  };
+
+  const openChangeHandler = (open: boolean) => {
+    if (!open) reset();
+    setOpen(open);
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={openChangeHandler}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <PencilIcon size={16} />
@@ -72,27 +72,45 @@ export const EditCommentDialog = ({ comment }: EditCommentDialogProps) => {
             Edit your comment to correct or add information.
           </DialogDescription>
         </DialogHeader>
-        {formErrors.length > 0 && <ErrorMessage errors={formErrors} />}
+        {formErrors && (
+          <div className="text-destructive">
+            {formErrors.map((error) => (
+              <div key={error}>{error}</div>
+            ))}
+          </div>
+        )}
         <form onSubmit={submitHandler} className="flex flex-col gap-5">
           <FieldGroup>
-            <Field>
+            <Field data-invalid={fieldErrors?.author && true}>
               <FieldLabel htmlFor="author">Author</FieldLabel>
               <Input
                 id="author"
                 name="author"
                 placeholder="Enter your name or nickname"
                 defaultValue={comment.author}
+                aria-invalid={fieldErrors?.author && true}
               />
+              {fieldErrors?.author && (
+                <FieldError
+                  errors={fieldErrors.author.map((e) => ({ message: e }))}
+                />
+              )}
             </Field>
-            <Field>
+            <Field data-invalid={fieldErrors?.message && true}>
               <FieldLabel htmlFor="message">Message</FieldLabel>
               <Textarea
                 id="message"
                 name="message"
                 placeholder="Share your opinion"
                 defaultValue={comment.message}
-                className="min-h-24"
+                aria-invalid={fieldErrors?.message && true}
+                className="min-h-24 resize-none"
               />
+              {fieldErrors?.message && (
+                <FieldError
+                  errors={fieldErrors.message.map((e) => ({ message: e }))}
+                />
+              )}
             </Field>
           </FieldGroup>
           <DialogFooter>
