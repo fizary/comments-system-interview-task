@@ -1,8 +1,11 @@
+import getConfig from "next/config";
 import { type Action, type PayloadAction } from "@reduxjs/toolkit";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { HYDRATE } from "next-redux-wrapper";
 import type { CustomBaseQueryFn } from "@/types/api";
 import { createCommentEndpoints } from "./comments";
+
+const { serverRuntimeConfig, publicRuntimeConfig } = getConfig();
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isHydrateAction(action: Action): action is PayloadAction<any> {
@@ -12,8 +15,7 @@ function isHydrateAction(action: Action): action is PayloadAction<any> {
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl:
-      process.env.NEXT_PUBLIC_DOCKER_API_URL ?? process.env.NEXT_PUBLIC_API_URL,
+    baseUrl: serverRuntimeConfig.API_URL || publicRuntimeConfig.API_URL,
   }) as CustomBaseQueryFn,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   extractRehydrationInfo(action, { reducerPath }): any {

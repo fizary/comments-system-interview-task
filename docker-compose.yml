@@ -21,6 +21,12 @@ services:
     volumes:
       - db-vol:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--password=${MYSQL_ROOT_PASSWORD}"]
+      start_period: 5s
+      interval: 30s
+      timeout: 5s
+      retries: 5
 
   backend:
     container_name: backend_api
@@ -33,9 +39,10 @@ services:
     networks:
       - backend
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
-      - DOCKER_DB_HOST=db
+      - DB_HOST=${DB_HOST:-db}
 
 
   frontend:
@@ -51,7 +58,7 @@ services:
     depends_on:
       - backend
     environment:
-      - NEXT_PUBLIC_DOCKER_API_URL=http://backend:8080
+      - NEXT_SERVER_API_URL=${NEXT_SERVER_API_URL:-http://backend:8080}
 
 networks:
   backend:
